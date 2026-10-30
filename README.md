@@ -1,4 +1,4 @@
-# University Placement and Internship Portal — Backend
+# University Placement and Internship Portal
 
 Node.js + Express + MongoDB (Mongoose) REST API. The React app lives in `frontend/`.
 
