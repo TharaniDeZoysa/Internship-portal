@@ -68,13 +68,40 @@ const internshipSchema = new mongoose.Schema(
       enum: ["Open", "Closed"],
       default: "Open"
     },
+    skills: {
+      type: [String],
+      default: []
+    },
+    openings: {
+      type: Number,
+      min: [1, "There must be at least 1 opening"],
+      default: 1
+    },
     postedBy: {
       type: String,
       trim: true,
       default: "University Placement Office"
+    },
+    // The company/admin account that owns this posting. Older records created
+    // before accounts existed have no owner and can only be managed by admins.
+    postedByUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      index: true
     }
   },
   { timestamps: true }
 );
+
+// The deadline day itself still counts as open (dates are stored at midnight).
+const DAY_MS = 24 * 60 * 60 * 1000;
+internshipSchema.virtual("isExpired").get(function isExpired() {
+  return (
+    Boolean(this.applicationDeadline) &&
+    this.applicationDeadline.getTime() + DAY_MS < Date.now()
+  );
+});
+internshipSchema.set("toJSON", { virtuals: true });
+internshipSchema.set("toObject", { virtuals: true });
 
 module.exports = mongoose.model("Internship", internshipSchema);

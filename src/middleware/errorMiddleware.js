@@ -5,6 +5,23 @@ function notFound(req, res, next) {
 }
 
 function errorHandler(error, req, res, next) {
+  // Errors created with httpError(status, message) are expected, not bugs.
+  if (error.statusCode) {
+    return res.status(error.statusCode).json({ message: error.message });
+  }
+
+  if (error.name === "MulterError") {
+    const message =
+      error.code === "LIMIT_FILE_SIZE"
+        ? "Resume is too large. The maximum size is 5 MB."
+        : "Could not upload the file. Send a single file in the 'resume' field.";
+    return res.status(400).json({ message });
+  }
+
+  if (error.code === 11000) {
+    return res.status(409).json({ message: "That value is already in use." });
+  }
+
   console.error(error);
 
   if (error.name === "ValidationError") {
